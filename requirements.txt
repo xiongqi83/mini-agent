@@ -1,0 +1,8 @@
+# MiniAgent 依赖
+
+# ── Mock 模式（默认）──
+# 无需额外依赖，直接运行
+
+# ── 真实 API 模式 ──
+# 填入 API_KEY 后安装以下依赖:
+openai>=1.0.0          # OpenAI 兼容客户端（DeepSeek 使用该协议）

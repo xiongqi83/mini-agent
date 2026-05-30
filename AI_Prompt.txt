@@ -1,0 +1,92 @@
+
+## 1. 创建项目结构和最小主循环
+
+目标：先搭建项目目录和最小可运行的 Agent Runtime 主流程。
+
+Prompt 摘要：
+
+```
+请帮我创建一个 Mini Agent Runtime 项目，先完成目录结构和最小主循环。
+
+当前阶段不要接入真实 LLM，不要实现复杂工具，也不要使用 LangChain、OpenHands 等现成 Agent 框架。
+
+要求 main.py 能启动 CLI 对话，runtime.py 中实现基础 Agent Loop：
+接收用户输入，构建 prompt，调用 mock LLM，判断 final_answer 或 tool_call，执行工具，读取 observation，并继续循环直到最终回答或达到最大步数限制。
+
+其他模块如 llm_client、tool_registry、session_manager、trace_logger 可以先用 mock 实现，但整体流程必须能跑通。
+
+
+2. 实现工具注册和基础工具
+
+目标：补充工具注册机制，并实现题目要求的至少三个工具。
+
+Prompt ：
+
+```
+继续完成工具注册和基础工具实现。
+
+要求实现 calculator、mock_search、read_docs 三个工具。每个工具需要有 name、description、parameters 和 execute 函数，并通过 tool_registry 统一注册和调用。
+
+工具执行结果统一返回 observation，包含 success、tool_name、summary、data、error 字段。
+
+同时补充异常处理：工具不存在、参数缺失、工具内部异常时不能让主程序崩溃，而是返回 error observation。
+
+```
+
+3. 完善 Prompt 构建和模型输出协议
+
+目标：让模型稳定区分直接回答和工具调用。
+
+Prompt 摘要：
+
+继续完善 prompt_builder 和模型输出协议。
+
+每次调用 LLM 前，prompt 中需要包含 system prompt、工具列表、当前用户输入、最近对话历史、session_state 和 latest observation。
+
+模型输出只能有两种 JSON 格式：
+1. final_answer：表示直接回答并结束本轮
+2. tool_call：表示需要调用工具
+示例：
+{
+  "type": "final_answer",
+  "content": "..."
+}
+
+{
+  "type": "tool_call",
+  "tool_name": "calculator",
+  "arguments": {
+    "expression": "1+1"
+  }
+}
+
+runtime 需要严格解析模型输出，根据 type 字段决定下一步动作。如果是 tool_call，则调用工具并将 observation 回填给模型继续循环；如果是 final_answer，则结束本轮。
+
+
+4. 实现 Session、Memory 和 Trace
+
+目标：支持多轮对话、跨轮次状态追问和执行轨迹记录。
+
+Prompt 摘要：
+
+基于当前项目，完善 session 维护、session_state 和 trace 日志。
+
+每个会话使用唯一 session_id，保存 conversation_history 和 session_state。
+
+conversation_history 保存用户与 assistant 的最终对话内容。
+session_state 保存结构化状态摘要，例如 last_run、last_task_run、last_successful_task_run、recent_runs。
+
+每次用户输入生成一个 run_id，并将本轮执行过程单独记录到 trace 文件中。trace 不写入 conversation_history，只用于调试和回放。
+
+
+5. 接入真实 LLM API
+
+目标：将前期 mock 流程替换为真实 LLM API 调用。
+
+Prompt 摘要：
+
+请在不改变 runtime 主循环的前提下，接入真实 LLM API。
+
+llm_client.py 需要封装统一 chat(messages) 接口，API Key 从config\settings.py读取，不要硬编码。
+
+runtime 仍然通过原有 final_answer / tool_call JSON 协议解析模型输出，不能因为接入真实模型而改变主流程。

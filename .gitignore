@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime data
+data/sessions/
+data/traces/
+data/todos.json
+
+# Sensitive config (contains API key)
+config/settings.py
+
+# OS
+.DS_Store
+Thumbs.db
