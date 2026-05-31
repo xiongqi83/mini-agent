@@ -2,7 +2,7 @@
 
 ## 1. 项目简介
 
-Mini Agent Runtime 是一个从零实现的最小可用 Agent 示例项目。项目不依赖 LangChain、OpenHands 等现成 Agent 框架完成主流程，实现 Agent Runtime、工具注册、工具调用、Session 维护、Memory 召回、Trace 日志和最大步数控制。
+Mini Agent是一个从零实现的最小可用 Agent 示例项目。项目不依赖 LangChain、OpenHands 等现成 Agent 框架完成主流程，实现 Agent Runtime、工具注册、工具调用、Session 维护、Memory 召回、Trace 日志和最大步数控制。
 
 本项目最基本的运行闭环：
 
