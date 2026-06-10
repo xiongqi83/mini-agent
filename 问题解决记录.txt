@@ -18,12 +18,12 @@
 
 问题解决：错误回填，大模型没有输出规定格式，用scratchpad捕获错误回填大模型下一轮继续思考。
 
-四、重复调用
+三、重复调用
 问题现象：
-在测试“读取 agent_runtime.md，并总结里面的核心内容”时，read_docs 工具被连续调用了两次，直到第三步模型才返回 final_answer。
+在测试“读取 agent_runtime.md，并总结里面的核心内容”时，read_docs 工具被连续调用了三次，达到最大步数直到第三步模型才返回 final_answer。
 
 问题原因：
-LLM 在拿到第一次 observation 后，没有意识到工具已经执行成功，仍然再次发起相同的 tool_call。这说明仅靠 prompt 提醒“不重复调用”不够稳定，runtime 需要具备重复工具调用保护。
+LLM 在拿到第一次 observation 后，因为被截断了内容，没有意识到工具已经执行成功，仍然再次发起相同的 tool_call，反复尝试读取文件发现内容一样，死循环兜底，才返回最终答案
 
 解决思路：
-在 runtime 中维护当前 run 的 seen_tool_calls。每次工具调用前，根据 tool_name 和 arguments 生成唯一 signature。如果同一个 signature 在当前 run 中已经成功执行过，则阻止重复执行，并记录轨迹。此时 runtime 可以复用已有 observation，提示模型基于已有 observation 生成 final_answer。这样即使模型重复请求同一个工具，程序也不会真的重复执行。
+不需要截断observation，返回原始内容即可
