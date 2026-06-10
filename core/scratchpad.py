@@ -1,30 +1,29 @@
-"""Scratchpad — 当前 run 的推理轨迹（thought / action / observation / error）"""
+"""Scratchpad — 本轮推理轨迹。每轮 run 内用列表维护，不写入 memory。"""
+
+from dataclasses import dataclass, field
 
 
-class Scratchpad:
-    """存放本轮推理轨迹，不写入 memory"""
+@dataclass
+class TraceRecord:
+    """单条轨迹记录"""
+    step: int
+    entry_type: str   # "action" | "observation" | "error"
+    content: str
 
-    def __init__(self):
-        self._entries: list[dict] = []
 
-    def add(self, step: int, entry_type: str, content: str):
-        """entry_type: action / observation / error"""
-        self._entries.append({
-            "step": step,
-            "type": entry_type,
-            "content": str(content)[:500],
-        })
+def render_scratchpad(entries: list[TraceRecord]) -> str:
+    """将轨迹列表渲染为 Prompt 可用的纯文本"""
+    if not entries:
+        return ""
 
-    def render(self) -> str:
-        """渲染为 Prompt 可用的文本"""
-        if not self._entries:
-            return "（暂无轨迹）"
-
-        lines = []
-        for e in self._entries:
-            label = {"action": "Action", "observation": "Observation", "error": "Error"}.get(e["type"], e["type"])
-            lines.append(f"Step {e['step']} [{label}]: {e['content'][:300]}")
-        return "\n".join(lines)
-
-    def clear(self):
-        self._entries.clear()
+    lines = []
+    for e in entries:
+        label = {
+            "action": "Action",
+            "observation": "Observation",
+            "error": "Error",
+        }.get(e.entry_type, e.entry_type)
+        # action/error 截断避免过长，observation 不截断（LLM 需要完整结果）
+        content = e.content[:200] if e.entry_type in ("action", "error") else e.content
+        lines.append(f"{label}: {content}")
+    return "\n".join(lines)

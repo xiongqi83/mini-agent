@@ -2,6 +2,7 @@
 
 import sys
 import os
+from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config.settings import API_KEY, API_BASE_URL, MODEL_NAME, MAX_STEPS
@@ -15,7 +16,10 @@ from core.memory.store import InMemoryStore
 
 
 def main():
+    session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     print("Mini Agent Runtime")
+    print(f"  会话: {session_id}")
     print(f"  模型: {MODEL_NAME}")
     print(f"  工具: {', '.join(ToolRegistry().list_tools())}")
     print(f"  最大步数: {MAX_STEPS}")
@@ -25,9 +29,9 @@ def main():
     tools = ToolRegistry()
     memory = ConversationMemory(InMemoryStore())
 
-    # Hook 系统：控制台输出
     hooks = HookManager()
     hooks.register(ConsoleHandler())
+    hooks.register(FileHandler(f"data/traces/{session_id}.jsonl"))
 
     runtime = Runtime(llm, tools, memory, hooks)
 
