@@ -73,8 +73,7 @@ Memory 分为两部分：**对话记忆** 和 **执行轨迹**，两者严格分
 [assistant] Thought: {Scratchpad 文本}   ← 本轮推理轨迹
 ```
 
-对话历史以独立 messages 追加（保留 role 标签），Scratchpad 以 `Thought:` 前缀嵌入 assistant 消息。这样 LLM 既能理解上下文，又能看到本轮已执行的工具步骤，决定下一步。
-
+对话历史以独立 messages 追加（保留 role 标签），Scratchpad 以 `Thought:` 前缀嵌入 assistant 消息。
 ## 演示
 
 **直接回答**
